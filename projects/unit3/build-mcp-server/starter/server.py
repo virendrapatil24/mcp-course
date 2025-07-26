@@ -64,7 +64,7 @@ async def analyze_file_changes(
             try:
                 context = mcp.get_context()
                 roots_result = await context.session.list_roots()
-                working_dirrectory = roots_result.roots[0].uri.path
+                working_directory = roots_result.roots[0].uri.path
             except Exception:
                 pass
 
@@ -177,11 +177,13 @@ async def suggest_template(changes_summary: str, change_type: str) -> str:
         changes_summary: Your analysis of what the changes do
         change_type: The type of change you've identified (bug, feature, docs, refactor, test, etc.)
     """
-    templates_response = get_pr_templates()
+    templates_response = await get_pr_templates()
     templates = json.loads(templates_response)
 
     template_file = TYPE_MAPPING.get(change_type.lower(), "feature.md")
-    selected_template = next((t for t in templates if t["filename"] == template_file))
+    selected_template = next(
+        (t for t in templates if t["filename"] == template_file), templates[0]
+    )
 
     suggestion = {
         "recommended_template": selected_template,
